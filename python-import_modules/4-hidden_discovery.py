@@ -1,15 +1,14 @@
 #!/usr/bin/python3
-import marshal
-def print_names():
-    # hidden_4.pyc faylını oxumaq
-    with open('/tmp/hidden_4.pyc', 'rb') as file:
-        file.seek(16)  # `.pyc` faylında ilk 16 bayt magic header və timestamp-ə aiddir
-        code = marshal.load(file)  # kodu marshal vasitəsilə yüklə
-    # Moduldakı adları tapmaq
-    names = dir(code)  # Modulun bütün atributlarının adlarını əldə et
-    # Sadece '__' ilə başlamayan adları çap et
-    for name in names:
-        if not name.startswith('__'):
-            print(name)
+import importlib.util
+import sys
+def get_module_names(module_path):
+    spec = importlib.util.spec_from_file_location("hidden_4", module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    names = [name for name in dir(module) if not name.startswith('__')]
+    return sorted(names)
 if __name__ == "__main__":
-    print_names()
+    module_path = '/tmp/hidden_4.pyc'
+    names = get_module_names(module_path)
+    for name in names:
+        print(name)
